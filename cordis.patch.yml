@@ -1,0 +1,12 @@
+- insert:
+    - id: dsh-office-cli
+      name: 'dsh-office-cli'
+      config:
+        approval: writes
+        timeoutMs: 120000
+        killGraceMs: 2000
+        maxOutputBytes: 262144
+        maxArgs: 128
+        maxArgLength: 65536
+        allowRawApi: false
+        workspaceFilesOnly: true

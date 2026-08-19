@@ -1,0 +1,9 @@
+.reference/
+node_modules/
+coverage/
+.tmp/
+*.tgz
+.env
+.env.*
+!.env.example
+.DS_Store

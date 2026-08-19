@@ -1,0 +1,81 @@
+{
+  "name": "dsh-office-cli",
+  "version": "0.1.0",
+  "description": "A secure DeepSeek Harness plugin for the official WeCom, DingTalk, and Feishu/Lark office CLIs",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./policy": "./src/policy.js",
+    "./runner": "./src/runner.js",
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "dsh-office": "./bin/dsh-office.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "skills",
+    "cordis.patch.yml",
+    "LICENSE",
+    "README.md",
+    "README.zh-CN.md",
+    "SECURITY.md",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run typecheck && npm test",
+    "pack:check": "npm pack --dry-run"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "wecom",
+    "dingtalk",
+    "feishu",
+    "lark",
+    "office-cli"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/meliwanx/dsh-office-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/meliwanx/dsh-office-cli/issues"
+  },
+  "homepage": "https://github.com/meliwanx/dsh-office-cli#readme",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.19"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-skill": "^0.1.0-rc.7",
+    "@deepseek-ai/dsh-tools": "^0.1.0-rc.7",
+    "@deepseek-ai/schemastery": "^3.18.1"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/cordis": { "optional": true },
+    "@deepseek-ai/dsh-skill": { "optional": true },
+    "@deepseek-ai/dsh-tools": { "optional": true },
+    "@deepseek-ai/schemastery": { "optional": true }
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "4.0.1",
+    "@deepseek-ai/dsh-skill": "0.1.0-rc.7",
+    "@deepseek-ai/dsh-system-prompt": "0.1.0-rc.7",
+    "@deepseek-ai/dsh-tools": "0.1.0-rc.7",
+    "@deepseek-ai/schemastery": "3.18.1",
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.2"
+  }
+}

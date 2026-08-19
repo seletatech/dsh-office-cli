@@ -1,0 +1,10 @@
+# Changelog
+
+## 0.1.0 - Unreleased
+
+- Add a native DSH bundle with `office_cli` and `office_cli_doctor` tools.
+- Add official WeCom, DingTalk, and Feishu/Lark CLI adapters.
+- Add shell-free execution, bounded output, timeout/cancellation, risk classification, and DSH approval routing.
+- Add credential, host-management, long-running command, raw API, and workspace-path safeguards.
+- Add a bundled DSH Skill plus terminal-side doctor and interactive auth helper.
+- Add an explicit, profile-independent managed installer for pinned official CLIs so plugin installation itself runs no vendor install scripts.
