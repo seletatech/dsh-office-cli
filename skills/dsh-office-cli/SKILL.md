@@ -35,14 +35,21 @@ Pass only native arguments in `args`; never include the executable or shell quot
 
 Keep discovery narrow. Do not dump every schema unless the user explicitly needs a complete audit.
 
+## Feishu/Lark recent messages
+
+- `im +chat-list` returns only group chats in creation order by default. For the latest conversations, use `["im", "+chat-list", "--types", "p2p,group", "--sort", "active_time", "--as", "user"]`.
+- Then read each relevant chat with `["im", "+chat-messages-list", "--chat-id", "<chat_id>", "--as", "user"]`; it returns the newest messages first by default.
+- Use `+messages-search` to find messages by keyword, sender, or time range. Its index can lag behind the newest messages, so do not treat it as the latest-messages view.
+- Message times are printed in the CLI host's local timezone without an offset; say which timezone you report.
+
 ## Security rules
 
 - Never pass secrets, tokens, passwords, app secrets, or client secrets as tool arguments; DSH persists tool calls in the session log.
-- Authentication, config initialization, upgrades, skill installation, servers, MCP mode, and event listeners are intentionally unavailable through `office_cli`. Ask the user to run `dsh-office auth <platform>` in their terminal.
+- Authentication, config initialization, upgrades, skill installation, servers, MCP mode, and event listeners are intentionally unavailable through `office_cli`. When authorization is missing or expired, show the `auth` hint from `office_cli_doctor`: the user connects through the host's own settings when the host provides an execution service, otherwise runs `dsh-office auth <platform>` in their terminal.
 - Raw `api` commands are disabled by default. Prefer curated helpers and schema-generated commands.
 - Use workspace-relative paths for upload/download operations. Paths outside the session workspace are rejected by default.
 - Do not work around a denial by invoking the vendor CLI through `bash`.
 
 ## Setup hints
 
-If doctor reports a missing CLI, show the exact `install` and `auth` commands from its result. Installation and browser/QR authorization belong to the user terminal, not a model tool call.
+If doctor reports a missing CLI, show the exact `install` and `auth` hints from its result. Installation and browser/QR authorization belong to the user terminal, not a model tool call.
