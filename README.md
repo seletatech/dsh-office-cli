@@ -17,6 +17,8 @@ This is an outbound office-capability plugin, not another chat-to-agent bridge. 
 - Default blocking for auth/config/upgrade/listener commands, credential arguments, raw API mode, and workspace-escaping paths.
 - DSH one-time approval for writes, destructive operations, and unknown commands.
 
+Use the tool's `dry_run: true` field for previews. The plugin inserts the vendor flag before value-taking options; message text that resembles a flag never counts as help or preview. Conflicting preview flags and `--` are rejected for previews. Raw CLI `--dry-run` arguments alone do not bypass write approval.
+
 | Platform | Official CLI | Auth |
 |---|---|---|
 | WeCom | [`@wecom/cli`](https://github.com/WecomTeam/wecom-cli) | `wecom-cli auth init` |

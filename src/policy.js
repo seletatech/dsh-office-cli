@@ -163,8 +163,10 @@ export function evaluateRequest(platform, args, dryRun, cwd, config) {
     }
   }
 
-  const effectiveDryRun = dryRun || args.includes('--dry-run')
-  if (effectiveDryRun) return allow('read', 'dry-run does not send the mutation')
+  if (dryRun && args.some(arg => arg === '--' || arg.startsWith('--dry-run='))) {
+    return deny('write', 'dry_run cannot be combined with an option terminator or a conflicting --dry-run value')
+  }
+  if (dryRun) return allow('read', 'dry-run does not send the mutation')
 
   const risk = classifyRisk(args)
   return allow(risk, risk === 'read' ? 'recognized read-only command' : `recognized ${risk} operation`)
@@ -175,9 +177,9 @@ export function evaluateRequest(platform, args, dryRun, cwd, config) {
  * @returns {Risk}
  */
 export function classifyRisk(args) {
-  if (args.some(arg => arg === '--help' || arg === '-h' || arg === '--version' || arg === '-V')) return 'read'
-  const tokens = args
-    .filter(arg => !arg.startsWith('-'))
+  const firstFlag = args.findIndex(arg => arg.startsWith('-'))
+  if (firstFlag !== -1 && ['--help', '-h', '--version', '-V'].includes(args[firstFlag])) return 'read'
+  const tokens = (firstFlag === -1 ? args : args.slice(0, firstFlag))
     .flatMap(arg => arg.split(/[\s:_./-]+/u))
     .map(normalizeToken)
     .filter(Boolean)
@@ -187,6 +189,19 @@ export function classifyRisk(args) {
   if (tokens.some(token => READ_VERBS.has(token))) return 'read'
   if (tokens.includes('get')) return 'read'
   return 'write'
+}
+
+/** Insert the preview flag before any value-taking option can consume it.
+ * @param {readonly string[]} args
+ * @param {boolean} dryRun
+ */
+export function executionArgs(args, dryRun) {
+  const result = [...args]
+  if (dryRun) {
+    const firstFlag = result.findIndex(arg => arg.startsWith('-'))
+    result.splice(firstFlag === -1 ? result.length : firstFlag, 0, '--dry-run')
+  }
+  return result
 }
 
 /**

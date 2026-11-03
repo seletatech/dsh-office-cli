@@ -73,7 +73,7 @@ test('current native executor waits for approval, fails closed, and grants exact
   }
   const root = await mkdtemp(join(tmpdir(), 'dsh-office-approval-'))
   const command = join(root, 'fixture-cli.js'), marker = join(root, 'sent.txt')
-  await writeFile(command, `#!${process.execPath}\nimport fs from 'node:fs';if(!process.argv.includes('--dry-run'))fs.appendFileSync(${JSON.stringify(marker)},'sent\\n');process.stdout.write(JSON.stringify({ok:true}));\n`)
+  await writeFile(command, `#!${process.execPath}\nimport fs from 'node:fs';let dry=false;for(let i=2;i<process.argv.length;i++){if(process.argv[i]==='--text'){i++;continue;}if(process.argv[i]==='--dry-run')dry=true;}if(!dry)fs.appendFileSync(${JSON.stringify(marker)},'sent\\n');process.stdout.write(JSON.stringify({ok:true}));\n`)
   await chmod(command, 0o700)
   const fiber = await ctx.plugin(OfficePlugin, { wecomCommand: command, timeoutMs: 5000 })
   const args = { platform: 'wecom', args: ['message', 'aibot', 'send', '--text', 'Synthetic approval fixture'], purpose: 'Send one synthetic reply' }
@@ -101,11 +101,18 @@ test('current native executor waits for approval, fails closed, and grants exact
     assert.equal((await execute(ctx, args, agent)).isError, true)
     assert.equal(requests, 3)
     assert.equal(await readFile(marker, 'utf8'), 'sent\n')
+    for (const text of ['--help', '--dry-run']) {
+      assert.equal((await execute(ctx, { ...args, args: ['message', 'aibot', 'send', '--text', text] }, agent)).isError, true)
+    }
+    assert.equal(requests, 5)
     assert.equal((await execute(ctx, { ...args, dry_run: true }, agent)).isError, false)
-    assert.equal(requests, 3)
+    for (const text of ['--dry-run', undefined]) {
+      assert.equal((await execute(ctx, { ...args, args: ['message', 'aibot', 'send', '--text', ...(text ? [text] : [])], dry_run: true }, agent)).isError, false)
+    }
+    assert.equal(requests, 5)
     assert.equal(await readFile(marker, 'utf8'), 'sent\n')
     assert.equal((await execute(ctx, args)).isError, true)
-    assert.equal(requests, 3)
+    assert.equal(requests, 5)
   } finally {
     await fiber.dispose()
     await rm(root, { recursive: true, force: true })

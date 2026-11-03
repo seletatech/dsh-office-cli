@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { classifyRisk, evaluateRequest } from '../src/policy.js'
+import { classifyRisk, evaluateRequest, executionArgs } from '../src/policy.js'
 
 const config = {
   maxArgs: 16,
@@ -19,6 +19,18 @@ test('classifies representative vendor commands', () => {
 test('dry-run downgrades mutations to read risk', () => {
   const result = evaluateRequest('feishu', ['im', '+messages-send', '--text', 'hello'], true, '/workspace', config)
   assert.deepEqual(result, { allowed: true, risk: 'read', reason: 'dry-run does not send the mutation' })
+})
+
+test('option values cannot impersonate help, read verbs or a preview flag', () => {
+  for (const value of ['--help', '-h', '--version', '-V', '--dry-run', 'list']) {
+    assert.equal(evaluateRequest('feishu', ['im', '+messages-send', '--text', value], false, '/workspace', config).risk, 'write')
+    assert.equal(classifyRisk(['unknown', 'operation', '--text', value]), 'write')
+  }
+  assert.equal(classifyRisk(['im', '+messages-send', '--help']), 'read')
+  assert.equal(classifyRisk(['--version']), 'read')
+  assert.deepEqual(executionArgs(['im', '+messages-send', '--text', '--dry-run'], true), ['im', '+messages-send', '--dry-run', '--text', '--dry-run'])
+  assert.deepEqual(executionArgs(['im', '+messages-send', '--text'], true), ['im', '+messages-send', '--dry-run', '--text'])
+  for (const flag of ['--dry-run=false', '--']) assert.equal(evaluateRequest('feishu', ['im', '+messages-send', flag], true, '/workspace', config).allowed, false)
 })
 
 test('blocks auth, raw APIs, long-running commands, and credential flags', () => {

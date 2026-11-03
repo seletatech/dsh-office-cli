@@ -3,7 +3,7 @@
 import { defineTool } from '@deepseek-ai/dsh-tools'
 import Schema from '@deepseek-ai/schemastery'
 import { ADAPTERS, PLATFORMS, resolveCommand } from './adapters.js'
-import { evaluateRequest } from './policy.js'
+import { evaluateRequest, executionArgs } from './policy.js'
 import { runProcess } from './runner.js'
 import { registerOfficeSkill } from './skill.js'
 
@@ -123,8 +123,7 @@ export function apply(ctx, config = {}) {
       if (!decision.allowed) throw new Error(decision.reason)
 
       const command = resolveCommand(platform, commandOverride(platform, resolved))
-      const vendorArgs = [...args.args]
-      if (args.dry_run === true && !vendorArgs.includes('--dry-run')) vendorArgs.push('--dry-run')
+      const vendorArgs = executionArgs(args.args, args.dry_run === true)
       const result = await runProcess(command.command, [...command.prefixArgs, ...vendorArgs], {
         cwd,
         timeoutMs: resolved.timeoutMs,
