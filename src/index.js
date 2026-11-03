@@ -26,6 +26,7 @@ export const inject = ['tools', 'skills']
  * @property {string | undefined} [wecomCommand]
  * @property {string | undefined} [dingtalkCommand]
  * @property {string | undefined} [feishuCommand]
+ * @property {string | undefined} [executorService]
  */
 
 export const Config = Schema.object({
@@ -40,9 +41,10 @@ export const Config = Schema.object({
   wecomCommand: Schema.string(),
   dingtalkCommand: Schema.string(),
   feishuCommand: Schema.string(),
+  executorService: Schema.string().description('Optional trusted Cordis execution service. No local fallback when configured.'),
 })
 
-/** @type {Required<Omit<ConfigShape, 'wecomCommand' | 'dingtalkCommand' | 'feishuCommand'>>} */
+/** @type {Required<Omit<ConfigShape, 'wecomCommand' | 'dingtalkCommand' | 'feishuCommand' | 'executorService'>>} */
 const DEFAULTS = Object.freeze({
   approval: 'writes',
   timeoutMs: 120000,
@@ -60,6 +62,26 @@ const DEFAULTS = Object.freeze({
  */
 export function apply(ctx, config = {}) {
   const resolved = resolveConfig(config)
+  if (resolved.executorService !== undefined) {
+    if (!/^[A-Za-z][A-Za-z0-9]*$/.test(resolved.executorService)) throw new Error('dsh-office-cli: invalid executor service name')
+    const serviceName = resolved.executorService
+    // Cordis removes tools/skills when the trusted executor unloads; credentials
+    // and session admission remain the executor's responsibility.
+    return ctx.inject([serviceName], scope => {
+      const executor = /** @type {any} */ (scope.get(serviceName))
+      if (typeof executor?.run !== 'function' || typeof executor?.inspect !== 'function') throw new Error('dsh-office-cli: executor must provide run and inspect')
+      install(scope, resolved, executor)
+    })
+  }
+  install(ctx, resolved)
+}
+
+/**
+ * @param {import('@deepseek-ai/cordis').Context} ctx
+ * @param {ReturnType<typeof resolveConfig>} resolved
+ * @param {{ run(request: any, exec: any): Promise<import('./runner.js').RunResult>, inspect(platform: Platform, exec: any): Promise<any> } | undefined} [executor]
+ */
+function install(ctx, resolved, executor) {
   const skills = /** @type {{ registerProvider(create: () => unknown): unknown }} */ (ctx.get('skills'))
   if (skills === undefined) throw new Error('dsh-office-cli: ctx.skills is required')
   registerOfficeSkill(skills)
@@ -124,7 +146,7 @@ export function apply(ctx, config = {}) {
 
       const command = resolveCommand(platform, commandOverride(platform, resolved))
       const vendorArgs = executionArgs(args.args, args.dry_run === true)
-      const result = await runProcess(command.command, [...command.prefixArgs, ...vendorArgs], {
+      const result = executor ? await executor.run({ platform, args: vendorArgs, purpose: args.purpose, risk: decision.risk, dryRun: args.dry_run === true, maxOutputBytes: resolved.maxOutputBytes }, exec) : await runProcess(command.command, [...command.prefixArgs, ...vendorArgs], {
         cwd,
         timeoutMs: resolved.timeoutMs,
         killGraceMs: resolved.killGraceMs,
@@ -192,7 +214,7 @@ export function apply(ctx, config = {}) {
     async execute(args, exec) {
       const platforms = args.platform === undefined ? PLATFORMS : [/** @type {Platform} */ (args.platform)]
       const cwd = exec.agent?.session.header.cwd ?? process.cwd()
-      return Promise.all(platforms.map(platform => inspectPlatform(platform, cwd, resolved, exec.signal)))
+      return Promise.all(platforms.map(platform => executor ? executor.inspect(platform, exec) : inspectPlatform(platform, cwd, resolved, exec.signal)))
     },
     presentCall: args => ({
       card: 'generic',

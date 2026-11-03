@@ -1,6 +1,6 @@
 {
   "name": "dsh-office-cli",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A secure DeepSeek Harness plugin for the official WeCom, DingTalk, and Feishu/Lark office CLIs",
   "type": "module",
   "main": "src/index.js",

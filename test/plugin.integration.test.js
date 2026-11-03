@@ -118,3 +118,62 @@ test('current native executor waits for approval, fails closed, and grants exact
     await rm(root, { recursive: true, force: true })
   }
 })
+
+test('trusted executor is lifecycle-bound, receives native session context, and never falls back locally', async () => {
+  const ctx = await runtime()
+  const fiber = await ctx.plugin(OfficePlugin, { executorService: 'fixtureOfficeExecutor', wecomCommand: process.execPath })
+  const tick = () => new Promise(resolve => setTimeout(resolve, 20))
+  assert.deepEqual(ctx.tools.schemas(), [])
+  assert.deepEqual(await ctx.skills.list(), [])
+  /** @type {Array<{ risk: string }>} */ const calls = []
+  const agent = { session: { header: { id: 'synthetic-private-session', cwd: tmpdir() } } }
+  let fail = false
+  const executor = {
+    /** @param {{ risk: string }} request @param {{ agent?: unknown }} exec */
+    async run(request, exec) {
+      assert.equal(exec.agent, agent)
+      if (fail) throw new Error('Synthetic broker failure')
+      calls.push(request)
+      return { exitCode: 0, signal: null, stdout: 'synthetic remote result', stderr: '', truncated: false, timedOut: false, aborted: false, durationMs: 0 }
+    },
+    /** @param {string} platform */
+    async inspect(platform) {
+      return { platform, available: true, source: 'trusted fixture', version: 'fixture', error: '', install: '', auth: '' }
+    },
+  }
+  const provider = {
+    name: 'fixture-office-executor',
+    /** @param {Context} scope */
+    apply(scope) { scope.provide('fixtureOfficeExecutor', executor) },
+  }
+  let service = await ctx.plugin(provider)
+  try {
+    await tick()
+    assert.equal(ctx.tools.schemas().length, 2)
+    assert.equal((await ctx.skills.list()).length, 1)
+    const args = { platform: 'wecom', args: ['--version'], purpose: 'Synthetic remote read' }
+    const result = await execute(ctx, args, agent)
+    assert.equal(result.isError, false)
+    assert.match(JSON.stringify(result), /synthetic remote result/)
+    assert.equal(calls.length, 1)
+    assert.equal(calls[0].risk, 'read')
+    fail = true
+    const failed = await execute(ctx, args, agent)
+    assert.equal(failed.isError, true)
+    assert.match(JSON.stringify(failed), /Synthetic broker failure/)
+    await service.dispose()
+    await tick()
+    assert.deepEqual(ctx.tools.schemas(), [])
+    assert.deepEqual(await ctx.skills.list(), [])
+    service = await ctx.plugin(provider)
+    await tick()
+    assert.equal(ctx.tools.schemas().length, 2)
+    assert.equal((await ctx.skills.list()).length, 1)
+    await fiber.dispose()
+    assert.deepEqual(ctx.tools.schemas(), [])
+    assert.deepEqual(await ctx.skills.list(), [])
+  } finally {
+    await service.dispose()
+    await fiber.dispose()
+  }
+})

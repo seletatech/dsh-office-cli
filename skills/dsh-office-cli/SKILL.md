@@ -7,6 +7,8 @@ description: Operate enterprise WeCom, DingTalk, and Feishu/Lark through their o
 
 Use the `office_cli` tool for official 企业微信 / WeCom, 钉钉 / DingTalk, and 飞书 / Lark workspace operations. Use `office_cli_doctor` when availability is unknown or a command cannot start.
 
+A cloud host may configure a trusted execution service with a smaller capability set. Inspect its help, follow its authorization instructions, and report unsupported operations. Native approval does not expand that service's permissions. Do not bypass a service failure by using a local CLI or another account.
+
 ## Platform mapping
 
 | User intent | `platform` | Native executable |
