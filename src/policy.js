@@ -186,6 +186,8 @@ export function classifyRisk(args) {
 
   if (tokens.some(token => DESTRUCTIVE_VERBS.has(token))) return 'destructive'
   if (tokens.some(token => WRITE_VERBS.has(token))) return 'write'
+  const commandPath = (firstFlag === -1 ? args : args.slice(0, firstFlag)).join(' ')
+  if (['docs +fetch', 'im +messages-mget'].includes(commandPath)) return 'read'
   if (tokens.some(token => READ_VERBS.has(token))) return 'read'
   if (tokens.includes('get')) return 'read'
   return 'write'
