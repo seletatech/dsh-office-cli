@@ -6,7 +6,7 @@ A secure DeepSeek Harness plugin that exposes the official WeCom, DingTalk, and 
 
 This is an outbound office-capability plugin, not another chat-to-agent bridge. It lets a DSH agent work with messages, contacts, docs, sheets, calendars, meetings, tasks, approvals, mail, and other vendor-supported services while the official CLIs continue to own authentication, API discovery, and compatibility.
 
-> Currently targets DeepSeek Harness `0.1.0-rc.7`, which is still a Developer Preview.
+> Tested with DSH SDK `0.1.0-rc.7` and `0.2.2-alpha.2`. The latter requires a Node version supported by that DSH runtime (tested with Node `24.22.2`). No DSH core patch or version exemption is required for these tested versions. Other preview versions are not covered by this compatibility claim.
 
 ## Included
 
