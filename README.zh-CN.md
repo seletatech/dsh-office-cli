@@ -1,5 +1,7 @@
 # dsh-office-cli
 
+> SeletaTech 兼容修复 fork：安装已验证版本：`dsh plugin --profile web add github:seletatech/dsh-office-cli#v0.1.1`。[发布、验证和上游补丁](https://github.com/seletatech/dsh-office-cli/releases/tag/v0.1.1)。原仓库已归档，保留其历史和 MIT 许可。
+
 [English](README.md) | 中文
 
 把企业微信、钉钉、飞书三家的**官方办公 CLI** 作为一个安全、原生的 DeepSeek Harness（DSH）插件提供给 Agent。

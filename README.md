@@ -1,5 +1,7 @@
 # dsh-office-cli
 
+> SeletaTech fork: install the verified release with `dsh plugin --profile web add github:seletatech/dsh-office-cli#v0.1.1`. [Release, validation and upstream patch](https://github.com/seletatech/dsh-office-cli/releases/tag/v0.1.1). The original upstream is archived; its history and MIT license are retained.
+
 [中文](README.zh-CN.md) | English
 
 A secure DeepSeek Harness plugin that exposes the official WeCom, DingTalk, and Feishu/Lark office CLIs through one native DSH tool.

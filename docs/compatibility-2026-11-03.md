@@ -20,3 +20,9 @@ The real current DSH executor checks a synthetic CLI fixture: no approval servic
 ## Limits
 
 These checks prove native integration and synthetic approval behavior for the named versions. They do not prove real Feishu/WeCom/DingTalk authorization, all platform APIs, cloud multi-user credential isolation, or SMTP/IMAP support. The bundled skill remains the progressive CLI discovery guide; complete vendor skill trees are not vendored. Real platform/account validation and any production deployment remain separate work.
+
+## Published artifact
+
+Release v0.1.1 points to 9eda228570d9778b5ea54813d837abf6351cda05. Public CI 41563268032 passes all three SDK/Node combinations. The published `github:seletatech/dsh-office-cli#v0.1.1` install spec was then tested directly through the official DSH plugin manager in a fresh temporary Web profile: install without exemption, model-invocable skill discovery, cold restart and native uninstall all passed. Temporary profiles were removed; no personal CLI credentials were reused.
+
+Creating the requested upstream PR was rejected by GitHub: `Repository was archived so is read-only (createPullRequest)`. The release includes `dsh-office-cli-v0.1.1-upstream.patch` containing the two functional commits, ready for `git am`. This fork-only distribution notice is kept separate from that upstream patch.
