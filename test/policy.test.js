@@ -14,6 +14,10 @@ test('classifies representative vendor commands', () => {
   assert.equal(classifyRisk(['im', '+messages-send', '--text', 'hello']), 'write')
   assert.equal(classifyRisk(['todo', 'delete', '--id', '1']), 'destructive')
   assert.equal(classifyRisk(['unknown', 'operation']), 'write')
+  assert.equal(classifyRisk(['docs', '+fetch', '--doc', 'fixture']), 'read')
+  assert.equal(classifyRisk(['im', '+messages-mget', '--message-ids', 'om_fixture']), 'read')
+  assert.equal(classifyRisk(['unknown', 'fetch']), 'write')
+  assert.equal(classifyRisk(['docs', '+fetch', 'send']), 'write')
 })
 
 test('dry-run downgrades mutations to read risk', () => {

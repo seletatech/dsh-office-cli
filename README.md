@@ -71,6 +71,14 @@ dsh plugin --profile web exec dsh-office auth dingtalk
 dsh plugin --profile web exec dsh-office auth feishu
 ```
 
+## Trusted execution services (0.1.2)
+
+The default remains a local official CLI. A cloud host may instead set `executorService: officeCliExecutor` in this plugin's native configuration. This is a trusted Cordis service name, never a model argument or a URL. The host owns that service and its account credentials; this package does not store vendor credentials or implement another agent loop.
+
+The service must expose `run(request, exec)` and `inspect(platform, exec)`. `request` contains `platform`, exact `args`, `purpose`, classified `risk`, `dryRun` and the configured `maxOutputBytes`; `exec` is the native tool execution context, including agent/session and cancellation signal. `run` returns the runner result shape in `src/runner.js`; `inspect` returns the existing doctor row shape. The service must enforce account/session authorization, its own capabilities, cancellation, bounded output and credential redaction. Plugin policy and native approval run before execution, but approval does not expand the service's permissions.
+
+The plugin waits for the configured service, removes tools and skills if it unloads, and never retries a failed service call using a local CLI. Local executable overrides are not executed in this mode. A host may expose fewer commands than a standalone CLI; inspect that host's help and authorization instructions. Configuring this option alone does not supply a cloud connector.
+
 ## Configuration
 
 Override the bundle row in the profile's `cordis.patch.yml` and restate its complete config:

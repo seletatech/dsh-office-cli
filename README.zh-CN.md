@@ -107,6 +107,14 @@ lark-cli auth login --recommend
 
 Agent 会先加载随包提供的 Skill；命令不确定时，先用厂商 schema/help 发现最小命令面，再调用 `office_cli`。写操作默认进入 DSH 的一次性审批流程。
 
+## 可信执行服务（0.1.2）
+
+默认仍执行本地官方 CLI。云端部署可在本插件的原生配置中设置 `executorService: officeCliExecutor`；它是可信 Cordis 服务名，不是模型参数或 URL。服务由部署方实现并管理每账号凭据；本插件不存储平台凭据，也不增加 Agent 循环。
+
+服务提供 `run(request, exec)` 与 `inspect(platform, exec)`。request 包含 platform、准确的 args、purpose、已分类的 risk、dryRun 及配置的 maxOutputBytes；exec 是原生工具执行上下文，含 Agent/会话及取消信号。run 返回 `src/runner.js` 的结果结构，inspect 返回既有 doctor 行结构。服务必须自行验证账号和会话权限、支持的能力、取消、输出上限及凭据脱敏。插件策略和原生审批仍先执行，但同意审批不会扩大服务权限。
+
+配置后插件等待该服务，服务卸载时工具和技能一起移除；服务调用失败绝不回退本地 CLI，此模式也不执行本地 executable 覆盖。云端可以只开放部分命令，请遵循其帮助及授权指引。只设置此选项不会自动生成云端连接器。
+
 ## 配置
 
 覆盖 profile 的 `cordis.patch.yml` 中同一个 `id`，并重述完整配置：
